@@ -1,93 +1,181 @@
-openapi: 3.0.1
+openapi: 3.0.3
 info:
-  title: TODO Plugin
-  description: A plugin that allows the user to create and manage a TODO list using ChatGPT. If you do not know the user's username, ask them first before making queries to the plugin. Otherwise, use the username "global".
-  version: 'v1'
+  title: Inventory Management Plugin
+  description: A plugin is designed to create and manage inventory lists using ChatGPT.
+  version: "v1"
 servers:
-  - url: http://localhost:5003
+  - url: http://localhost:8090
 paths:
-  /todos/{username}:
+  /api/collections/inventory/records:
     get:
-      operationId: getTodos
-      summary: Get the list of todos
-      parameters:
-      - in: path
-        name: username
-        schema:
-            type: string
-        required: true
-        description: The name of the user.
+      operationId: getInventories
+      summary: Get the list of inventories
       responses:
         "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/getTodosResponse'
+                $ref: "#/components/schemas/getInventoriesResponse"
     post:
-      operationId: addTodo
-      summary: Add a todo to the list
-      parameters:
-      - in: path
-        name: username
-        schema:
-            type: string
-        required: true
-        description: The name of the user.
+      operationId: addInventories
+      summary: Add a inventory to the list
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/addTodoRequest'
+              $ref: "#/components/schemas/addInventoryRequest"
       responses:
         "200":
           description: OK
-    delete:
-      operationId: deleteTodo
-      summary: Delete a todo from the list
+
+  /api/collections/inventory/records/{id}:
+    patch:
+      operationId: updateInventory
+      summary: Update a inventory from the list
       parameters:
-      - in: path
-        name: username
-        schema:
+        - in: path
+          name: id
+          schema:
             type: string
-        required: true
-        description: The name of the user.
+          required: true
+          description: The id of the inventory.
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/deleteTodoRequest'
+              $ref: "#/components/schemas/patchInventoryRequest"
+      responses:
+        "200":
+          description: OK
+
+    delete:
+      operationId: deleteInventory
+      summary: Delete a inventory from the list
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: The id of the inventory.
       responses:
         "200":
           description: OK
 
 components:
   schemas:
-    getTodosResponse:
+    # 在庫を取得するAPIのレスポンス
+    getInventoriesResponse:
       type: object
       properties:
-        todos:
+        items:
           type: array
+          description: The list of inventories.
           items:
-            type: string
-          description: The list of todos.
-    addTodoRequest:
+            allOf:
+              - type: object
+                properties:
+                  id:
+                    $ref: "#/components/schemas/InventoryId"
+                  collectionId:
+                    $ref: "#/components/schemas/InventoryCollectionId"
+                  collectionName:
+                    $ref: "#/components/schemas/InventoryCollectionName"
+                  series:
+                    $ref: "#/components/schemas/InventorySeries"
+                  name:
+                    $ref: "#/components/schemas/InventoryName"
+                  jancode:
+                    $ref: "#/components/schemas/InventoryJanCode"
+                  type:
+                    $ref: "#/components/schemas/InventoryType"
+                  count:
+                    $ref: "#/components/schemas/InventoryCount"
+
+    # 在庫を追加するAPIのリクエスト
+    addInventoryRequest:
       type: object
       required:
-      - todo
+        - series
+        - name
+        - jancode
+        - type
+        - count
       properties:
-        todo:
-          type: string
-          description: The todo to add to the list.
-          required: true
-    deleteTodoRequest:
+        series:
+          $ref: "#/components/schemas/InventorySeries"
+        name:
+          $ref: "#/components/schemas/InventoryName"
+        jancode:
+          $ref: "#/components/schemas/InventoryJanCode"
+        type:
+          $ref: "#/components/schemas/InventoryType"
+        count:
+          $ref: "#/components/schemas/InventoryCount"
+
+    # 在庫を更新するAPIのリクエスト
+    patchInventoryRequest:
       type: object
       required:
-      - todo_idx
+        - series
+        - name
+        - jancode
+        - type
+        - count
       properties:
-        todo_idx:
-          type: integer
-          description: The index of the todo to delete.
-          required: true
+        series:
+          $ref: "#/components/schemas/InventorySeries"
+        name:
+          $ref: "#/components/schemas/InventoryName"
+        jancode:
+          $ref: "#/components/schemas/InventoryJanCode"
+        type:
+          $ref: "#/components/schemas/InventoryType"
+        count:
+          $ref: "#/components/schemas/InventoryCount"
+
+    InventoryId:
+      type: string
+      example: RECORD_ID
+      description: The id of the inventory.
+
+    InventoryCollectionId:
+      type: string
+      example: bvbq301xqrxyhes
+      description: The collection id of the inventory.
+
+    InventoryCollectionName:
+      type: string
+      example: inventory
+      description: The collection name of the inventory.
+
+    InventorySeries:
+      type: string
+      example: Apple Watch
+      description: The series of the inventory.
+
+    InventoryName:
+      type: string
+      example: Apple Watch Series 6
+      description: The name of the inventory.
+
+    InventoryJanCode:
+      type: string
+      example: 1234567890123
+      description: The jan code of the inventory.
+
+    InventoryType:
+      type: string
+      example: product
+      enum:
+        - product
+        - material
+      description: The type of the inventory.
+
+    InventoryCount:
+      type: integer
+      example: 12
+      description: The count of the inventory.
