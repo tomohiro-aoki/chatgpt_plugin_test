@@ -1,0 +1,18 @@
+{
+  "schema_version": "v1",
+  "name_for_human": "在庫管理くん",
+  "name_for_model": "inventory",
+  "description_for_human": "在庫リストを管理するためのプラグインで、在庫を追加、削除、表示、また入荷と出荷情報より未来の在庫数を予測することができます。",
+  "description_for_model": "在庫リストの管理でユーザーをサポートします。在庫項目の追加、削除、閲覧が可能です。また入荷と出荷の情報を用いて未来の在庫数を予想することも可能です。",
+  "auth": {
+    "type": "none"
+  },
+  "api": {
+    "type": "openapi",
+    "url": "http://localhost:8090/openapi.yaml",
+    "is_user_authenticated": false
+  },
+  "logo_url": "http://localhost:8090/logo.jpg",
+  "contact_email": "legal@example.com",
+  "legal_info_url": "http://example.com/legal"
+}

@@ -1,0 +1,301 @@
+openapi: 3.0.3
+info:
+  title: 在庫管理プラグイン
+  description: ChatGPTを利用して在庫リストを作成・管理、また入荷リストと出荷リストを取得するためのプラグインです
+  version: "v1"
+servers:
+  - url: http://localhost:8090
+paths:
+  /api/collections/inventory/records:
+    get:
+      operationId: getInventories
+      summary: 在庫リストを取得します
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/getInventoriesResponse"
+    post:
+      operationId: addInventories
+      summary: 在庫リストに在庫項目を追加できます
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/addInventoryRequest"
+      responses:
+        "200":
+          description: OK
+
+  /api/collections/inventory/records/{id}:
+    patch:
+      operationId: updateInventory
+      summary: 在庫リストの在庫項目を更新できます
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: The id of the inventory.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/patchInventoryRequest"
+      responses:
+        "200":
+          description: OK
+
+    delete:
+      operationId: deleteInventory
+      summary: 在庫リストから指定された在庫項目を削除します
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: The id of the inventory.
+      responses:
+        "200":
+          description: OK
+
+  /api/collections/shipment/records:
+    get:
+      operationId: getShipments
+      summary: 出荷リストを取得します
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/getShipmentsResponse"
+
+  /api/collections/arrival/records:
+    get:
+      operationId: getArrivals
+      summary: 入荷リストを取得します
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/getArrivalsResponse"
+
+components:
+  schemas:
+    # 在庫を取得するAPIのレスポンス
+    getInventoriesResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          description: 在庫項目のリストです
+          items:
+            allOf:
+              - type: object
+                properties:
+                  id:
+                    $ref: "#/components/schemas/InventoryId"
+                  collectionId:
+                    $ref: "#/components/schemas/InventoryCollectionId"
+                  collectionName:
+                    $ref: "#/components/schemas/InventoryCollectionName"
+                  series:
+                    $ref: "#/components/schemas/InventorySeries"
+                  name:
+                    $ref: "#/components/schemas/InventoryName"
+                  jancode:
+                    $ref: "#/components/schemas/InventoryJanCode"
+                  count:
+                    $ref: "#/components/schemas/InventoryCount"
+
+    # 在庫を追加するAPIのリクエスト
+    addInventoryRequest:
+      type: object
+      required:
+        - series
+        - name
+        - jancode
+        - type
+        - count
+      properties:
+        series:
+          $ref: "#/components/schemas/InventorySeries"
+        name:
+          $ref: "#/components/schemas/InventoryName"
+        jancode:
+          $ref: "#/components/schemas/InventoryJanCode"
+        count:
+          $ref: "#/components/schemas/InventoryCount"
+
+    # 在庫を更新するAPIのリクエスト
+    patchInventoryRequest:
+      type: object
+      required:
+        - series
+        - name
+        - jancode
+        - type
+        - count
+      properties:
+        series:
+          $ref: "#/components/schemas/InventorySeries"
+        name:
+          $ref: "#/components/schemas/InventoryName"
+        jancode:
+          $ref: "#/components/schemas/InventoryJanCode"
+        count:
+          $ref: "#/components/schemas/InventoryCount"
+
+    InventoryId:
+      type: string
+      example: RECORD_ID
+      description: 在庫IDです。ユニークな値が生成されます
+
+    InventoryCollectionId:
+      type: string
+      example: bvbq301xqrxyhes
+      description: The collection id of the inventory.
+
+    InventoryCollectionName:
+      type: string
+      example: inventory
+      description: The collection name of the inventory.
+
+    InventorySeries:
+      type: string
+      example: Apple Watch
+      description: 在庫項目のシリーズ名です
+
+    InventoryName:
+      type: string
+      example: Apple Watch Series 6
+      description: 在庫項目の名称です
+
+    InventoryJanCode:
+      type: string
+      example: 1234567890123
+      description: 在庫項目のJANコードです
+
+    InventoryCount:
+      type: integer
+      example: 12
+      description: 在庫項目の在庫数です
+
+    # 出荷を取得するAPIのレスポンス
+    getShipmentsResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          description: 在庫項目の変動を確認できる、出荷のリストです
+          items:
+            allOf:
+              - type: object
+                properties:
+                  id:
+                    $ref: "#/components/schemas/ShipmentId"
+                  collectionId:
+                    $ref: "#/components/schemas/ShipmentCollectionId"
+                  collectionName:
+                    $ref: "#/components/schemas/ShipmentCollectionName"
+                  inventory_name:
+                    $ref: "#/components/schemas/ShipmentInventoryName"
+                  count:
+                    $ref: "#/components/schemas/ShipmentInventoryCount"
+                  shipment_date:
+                    $ref: "#/components/schemas/ShipmentDate"
+
+    ShipmentId:
+      type: string
+      example: RECORD_ID
+      description: 出荷IDです。ユニークな値が生成されます
+
+    ShipmentCollectionId:
+      type: string
+      example: bvbq301xqrxyhes
+      description: The collection id of the shipment.
+
+    ShipmentCollectionName:
+      type: string
+      example: inventory
+      description: The collection name of the shipment.
+
+    ShipmentInventoryName:
+      type: string
+      example: Apple Watch
+      description: 出荷された在庫項目の名称です
+
+    ShipmentInventoryCount:
+      type: integer
+      example: 12
+      description: 出荷された在庫項目の在庫数です
+
+    ShipmentDate:
+      type: string
+      format: date-time
+      example: "2020-01-01T00:00:00"
+      description: 出荷された日付です
+
+    # 入荷を取得するAPIのレスポンス
+    getArrivalsResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          description: 在庫項目の変動を確認できる、入荷のリストです
+          items:
+            allOf:
+              - type: object
+                properties:
+                  id:
+                    $ref: "#/components/schemas/ArrivalId"
+                  collectionId:
+                    $ref: "#/components/schemas/ArrivalCollectionId"
+                  collectionName:
+                    $ref: "#/components/schemas/ArrivalCollectionName"
+                  inventory_name:
+                    $ref: "#/components/schemas/ArrivalInventoryName"
+                  count:
+                    $ref: "#/components/schemas/ArrivalInventoryCount"
+                  arrival_date:
+                    $ref: "#/components/schemas/ArrivalDate"
+
+    ArrivalId:
+      type: string
+      example: RECORD_ID
+      description: 入荷IDです。ユニークな値が生成されます
+
+    ArrivalCollectionId:
+      type: string
+      example: bvbq301xqrxyhes
+      description: The collection id of the arrival.
+
+    ArrivalCollectionName:
+      type: string
+      example: inventory
+      description: The collection name of the arrival.
+
+    ArrivalInventoryName:
+      type: string
+      example: Apple Watch
+      description: 入荷された在庫項目の名称です
+
+    ArrivalInventoryCount:
+      type: integer
+      example: 12
+      description: 入荷された在庫項目の在庫数です
+
+    ArrivalDate:
+      type: string
+      format: date-time
+      example: "2020-01-01T00:00:00"
+      description: 入荷された日付です
